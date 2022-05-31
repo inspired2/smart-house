@@ -1,82 +1,95 @@
 #![allow(unused)]
 
 use std::{
+    hash::Hash,
     collections::{HashMap, HashSet},
     io::Error,
 };
 
-trait Info {
-    fn get_device_info(&self, device_name: &str, room_name: &str) -> String;
-    fn get_devices(&self, room_name: &str) -> Vec<Device>;
+struct SmartHouse {
+    rooms: HashSet<Room>,
 }
-impl House {
-    fn get_report<T: Info>(&self, provider: T) -> Vec<String> {
-        let mut output = Vec::new();
-        for room in self.rooms.iter() {
-            let devices = provider.get_devices(room);
-            for device in devices {
-                output.push(device.get_state())
-            }
-        }
-        output
-    }
-}
-struct House {
-    rooms: HashSet<String>,
-}
+
 struct Room {
     name: String,
     devices: Vec<String>
 }
-struct Devices {
-    //room => devices
-    list: HashMap<String, Vec<Device>>,
+
+impl PartialEq for Room {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name
+    }
+}
+impl Eq for Room {}
+impl Hash for Room {
+
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+    }
 }
 
-impl Info for Devices {
-    fn get_devices(&self, room_name: &str) -> Vec<Device> {
-        self.list.get(room_name).unwrap().to_owned()
-    }
-    fn get_device_info(&self, device_name: &str, room_name: &str) -> String {
-        let ents = self.list.iter();
-        for (room, devices) in ents {
-            if room == room_name {
-                return devices
-                .iter()
-                .find(|&dev| dev.get_name() == device_name)
-                .unwrap()
-                .get_state();
-            }
+
+impl SmartHouse {
+    fn new() -> Self {
+        Self {
+            rooms: HashSet::new(),
         }
-        "Error: no device with such credentials".into()
-        //iter self
-        //match each device and f
+    }
+    fn get_rooms(&self) -> Vec<&str> {
+        self.rooms.iter().map(|r| r.name.as_str()).collect()
+    }
+    fn add_room(&mut self, room: Room) -> bool {
+        self.rooms.insert(room)
+    }
+    fn get_devices(&self, room: &str) -> Vec<SmartDevice> {
+        todo!()
+    }
+    fn get_report<T: DeviceInfoProvider>(&self, provider: T) -> SmartHouseReport {
+        todo!()
     }
 }
-trait DeviceState {
-    fn get_state(&self) -> String;
-}
-#[derive(Clone)]
-enum Device {
+enum SmartDevice {
     Thermo(Thermometer),
-    PowerSock(PowerSocket),
+    Socket(PowerSocket)
 }
-impl Device {
+impl SmartDevice {
     fn get_name(&self) -> String {
         match self {
-            Device::Thermo(t) => t.name.to_string(),
-            Device::PowerSock(p) => p.name.to_string(),
+            SmartDevice::Socket(s) => s.name.to_owned(),
+            SmartDevice::Thermo(t) => t.name.to_owned()
         }
     }
-}
-impl DeviceState for Device {
     fn get_state(&self) -> String {
-        match self {
-            Device::Thermo(t) => t.get_celsius().to_string(),
-            Device::PowerSock(s) => format!("{:?}", s.get_state()),
+                match self {
+            SmartDevice::Socket(s) => format!("{:?}", s.get_state()),
+            SmartDevice::Thermo(t) => format!("{:?}", t.get_temperature())}
         }
     }
+
+struct DeviceInfo {
+    name: String,
+    state: String,
 }
+struct SmartDeviceList(HashMap<String, Vec<SmartDevice>>);
+impl DeviceInfoProvider for SmartDeviceList {
+    fn get_device_info(&self, room: &str, device: &str) -> Option<DeviceInfo> {
+        let room_devices = self.0.get(room).unwrap();
+        let device = room_devices.iter().find(|&d| d.get_name() == device);
+        if device.is_none() { return None };
+        Some(DeviceInfo {
+            name: device.unwrap().get_name(),
+            state: device.unwrap().get_state()
+        })
+    }
+}
+trait DeviceInfoProvider {
+    fn get_device_info(&self, device_name: &str, room_name: &str) -> Option<DeviceInfo>;
+}
+struct SmartHouseReport {
+    inner: HashMap<String, Vec<HashMap<String, String>>>
+}
+
+
 #[derive(Clone)]
 struct Thermometer {
     name: String,
