@@ -1,10 +1,30 @@
 #![allow(unused)]
-
 use std::{
     hash::Hash,
-    collections::{HashMap, HashSet},
-    io::Error,
+    collections::{ HashMap, HashSet },
 };
+
+fn main() {
+    let mut house = SmartHouse::new();
+
+    let device1 = SmartDevice::Thermo(Thermometer { name: "Therm1".to_owned(), state: Temperature::Celsius(18.0)});
+    let device2 = SmartDevice::Socket(PowerSocket {
+        name: "Socket1".to_owned(), description: "Power Socket".to_owned(), state: PowerSocketState::NotPowered, power_consumption: 0
+    });
+
+    let mut room1 = Room::with_name("room1");
+    let mut room2 = Room::with_name("room2");
+    room1.add_device("Therm1");
+    room2.add_device("Socket1");
+
+    house.add_room(room1);
+    house.add_room(room2);
+
+    let mut device_store = SmartDeviceList::new();
+    device_store.add_device("room1", device1);
+    device_store.add_device("room2", device2);
+
+}
 
 struct SmartHouse {
     rooms: HashSet<Room>,
@@ -12,9 +32,17 @@ struct SmartHouse {
 
 struct Room {
     name: String,
-    devices: Vec<String>
+    devices: HashSet<String>
 }
+impl Room {
+    fn with_name(name: &str) -> Self {
+        Self { name: name.to_owned(), devices: HashSet::new()}
+    }
+    fn add_device(&mut self, name: &str) {
+        self.devices.insert(name.to_owned());
+    }
 
+}
 impl PartialEq for Room {
     fn eq(&self, other: &Self) -> bool {
         self.name == other.name
@@ -41,7 +69,7 @@ impl SmartHouse {
     fn add_room(&mut self, room: Room) -> bool {
         self.rooms.insert(room)
     }
-    fn get_devices(&self, room: &str) -> Vec<SmartDevice> {
+    fn get_devices(&self, room: &str) -> Vec<String> {
         todo!()
     }
     fn get_report<T: DeviceInfoProvider>(&self, provider: T) -> SmartHouseReport {
@@ -71,6 +99,14 @@ struct DeviceInfo {
     state: String,
 }
 struct SmartDeviceList(HashMap<String, Vec<SmartDevice>>);
+impl SmartDeviceList {
+    fn new() -> Self {
+        Self(HashMap::new())
+    }
+    fn add_device(&mut self, room: &str, device: SmartDevice) {
+        self.0.entry(room.to_owned()).or_insert(Vec::new()).push(device);
+    }
+}
 impl DeviceInfoProvider for SmartDeviceList {
     fn get_device_info(&self, room: &str, device: &str) -> Option<DeviceInfo> {
         let room_devices = self.0.get(room).unwrap();
