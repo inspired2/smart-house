@@ -1,15 +1,21 @@
 #![allow(unused)]
 use std::{
+    collections::{HashMap, HashSet},
     hash::Hash,
-    collections::{ HashMap, HashSet },
 };
 
 fn main() {
     let mut house = SmartHouse::new();
 
-    let device1 = SmartDevice::Thermo(Thermometer { name: "Therm1".to_owned(), state: Temperature::Celsius(18.0)});
+    let device1 = SmartDevice::Thermo(Thermometer {
+        name: "Therm1".to_owned(),
+        state: Temperature::Celsius(18.0),
+    });
     let device2 = SmartDevice::Socket(PowerSocket {
-        name: "Socket1".to_owned(), description: "Power Socket".to_owned(), state: PowerSocketState::NotPowered, power_consumption: 0
+        name: "Socket1".to_owned(),
+        description: "Power Socket".to_owned(),
+        state: PowerSocketState::NotPowered,
+        power_consumption: 0,
     });
 
     let mut room1 = Room::with_name("room1");
@@ -20,10 +26,12 @@ fn main() {
     house.add_room(room1);
     house.add_room(room2);
 
-    let mut device_store = SmartDeviceList::new();
-    device_store.add_device("room1", device1);
-    device_store.add_device("room2", device2);
+    let mut device_list = SmartDeviceList::new();
+    device_list.add_device("room1", device1);
+    device_list.add_device("room2", device2);
 
+    let report = house.get_report(device_list);
+    println!("{}", report);
 }
 
 struct SmartHouse {
@@ -32,16 +40,18 @@ struct SmartHouse {
 
 struct Room {
     name: String,
-    devices: HashSet<String>
+    devices: HashSet<String>,
 }
 impl Room {
     fn with_name(name: &str) -> Self {
-        Self { name: name.to_owned(), devices: HashSet::new()}
+        Self {
+            name: name.to_owned(),
+            devices: HashSet::new(),
+        }
     }
     fn add_device(&mut self, name: &str) {
         self.devices.insert(name.to_owned());
     }
-
 }
 impl PartialEq for Room {
     fn eq(&self, other: &Self) -> bool {
@@ -50,12 +60,10 @@ impl PartialEq for Room {
 }
 impl Eq for Room {}
 impl Hash for Room {
-
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.name.hash(state);
     }
 }
-
 
 impl SmartHouse {
     fn new() -> Self {
@@ -70,31 +78,55 @@ impl SmartHouse {
         self.rooms.insert(room)
     }
     fn get_devices(&self, room: &str) -> Vec<String> {
-        todo!()
+        let devices = Vec::new();
+        let room = self.rooms.iter().find(|&r| r.name == room);
+        if room.is_none() {
+            return devices;
+        };
+        room.unwrap().devices.iter().map(|d| d.to_owned()).collect()
     }
-    fn get_report<T: DeviceInfoProvider>(&self, provider: T) -> SmartHouseReport {
-        todo!()
+    fn get_report<T: DeviceInfoProvider>(&self, provider: T) -> String {
+        let mut report = String::new();
+        for &room in self.get_rooms().iter() {
+            for device in self.get_devices(room) {
+                let device_info: String = provider
+                    .get_device_info(room, &device)
+                    .map(|i| format!("{:?}", i))
+                    .unwrap_or_else(|| "device not found".to_string());
+                report += &format!("room: {}, device: {}\n", room, device_info);
+            }
+        }
+        report
     }
 }
 enum SmartDevice {
     Thermo(Thermometer),
-    Socket(PowerSocket)
+    Socket(PowerSocket),
 }
 impl SmartDevice {
     fn get_name(&self) -> String {
         match self {
             SmartDevice::Socket(s) => s.name.to_owned(),
-            SmartDevice::Thermo(t) => t.name.to_owned()
+            SmartDevice::Thermo(t) => t.name.to_owned(),
         }
     }
     fn get_state(&self) -> String {
-                match self {
+        match self {
             SmartDevice::Socket(s) => format!("{:?}", s.get_state()),
-            SmartDevice::Thermo(t) => format!("{:?}", t.get_temperature())}
+            SmartDevice::Thermo(t) => format!("{:?}", t.get_temperature()),
         }
     }
+    fn get_type(&self) -> String {
+        match self {
+            SmartDevice::Socket(_) => "SmartSocket".to_owned(),
+            SmartDevice::Thermo(_) => "SmartThermometer".to_owned(),
+        }
+    }
+}
 
+#[derive(Debug)]
 struct DeviceInfo {
+    kind: String,
     name: String,
     state: String,
 }
@@ -104,27 +136,26 @@ impl SmartDeviceList {
         Self(HashMap::new())
     }
     fn add_device(&mut self, room: &str, device: SmartDevice) {
-        self.0.entry(room.to_owned()).or_insert(Vec::new()).push(device);
+        self.0
+            .entry(room.to_owned())
+            .or_insert(Vec::new())
+            .push(device);
     }
 }
 impl DeviceInfoProvider for SmartDeviceList {
     fn get_device_info(&self, room: &str, device: &str) -> Option<DeviceInfo> {
         let room_devices = self.0.get(room).unwrap();
-        let device = room_devices.iter().find(|&d| d.get_name() == device);
-        if device.is_none() { return None };
+        let device = room_devices.iter().find(|&d| d.get_name() == device)?;
         Some(DeviceInfo {
-            name: device.unwrap().get_name(),
-            state: device.unwrap().get_state()
+            kind: device.get_type(),
+            name: device.get_name(),
+            state: device.get_state(),
         })
     }
 }
 trait DeviceInfoProvider {
-    fn get_device_info(&self, device_name: &str, room_name: &str) -> Option<DeviceInfo>;
+    fn get_device_info(&self, room: &str, device: &str) -> Option<DeviceInfo>;
 }
-struct SmartHouseReport {
-    inner: HashMap<String, Vec<HashMap<String, String>>>
-}
-
 
 #[derive(Clone)]
 struct Thermometer {
