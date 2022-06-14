@@ -25,11 +25,10 @@ fn main() -> Result<(), &'static str> {
     let mut room1 = Room::with_name("room1");
     let room2 = Room::with_name("room2");
 
-    //add devices to rooms directly:
+    //we can add devices to rooms directly:
     //note that devices are stored as text ids
     //devices as entities are stored separately - in some device list
     room1.try_add_device("Therm1")?;
-    //room2.add_device("Socket1");
 
     //add rooms to the house:
     //note that room names are case insensitive - rooms "Room1", "ROOM1", "room1" will be treated as same room names on insertion;

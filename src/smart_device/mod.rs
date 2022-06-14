@@ -1,12 +1,8 @@
 mod power_socket;
 mod thermometer;
 
-use crate::device_info_provider::{DeviceInfo, DeviceInfoProvider};
-
 pub use power_socket::{PowerSocket, PowerSocketState};
 pub use thermometer::{Temperature, Thermometer};
-
-use std::collections::HashMap;
 
 #[derive(Debug)]
 pub enum SmartDevice {
@@ -14,19 +10,19 @@ pub enum SmartDevice {
     Socket(PowerSocket),
 }
 impl SmartDevice {
-    fn get_name(&self) -> String {
+    pub fn get_name(&self) -> String {
         match self {
             SmartDevice::Socket(s) => s.name.to_owned(),
             SmartDevice::Thermo(t) => t.name.to_owned(),
         }
     }
-    fn get_state(&self) -> String {
+    pub fn get_state(&self) -> String {
         match self {
             SmartDevice::Socket(s) => format!("{:?}", s.get_state()),
             SmartDevice::Thermo(t) => format!("{:?}", t.get_temperature()),
         }
     }
-    fn get_type(&self) -> String {
+    pub fn get_type(&self) -> String {
         match self {
             SmartDevice::Socket(_) => "SmartSocket".to_owned(),
             SmartDevice::Thermo(_) => "SmartThermometer".to_owned(),
@@ -34,27 +30,33 @@ impl SmartDevice {
     }
 }
 
-#[derive(Default)]
-pub struct SmartDeviceList(HashMap<String, Vec<SmartDevice>>);
-impl SmartDeviceList {
-    pub fn new() -> Self {
-        Self(HashMap::new())
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn create_therm() {
+        let thermometer = Thermometer {
+            name: "thermometer".to_owned(),
+            state: Temperature::Celsius(11.),
+        };
+        let device = SmartDevice::Thermo(thermometer);
+        assert_eq!(device.get_name(), "thermometer");
+        assert_eq!(device.get_type(), "SmartThermometer");
+        assert_eq!(
+            device.get_state(),
+            format!("{:?}", Temperature::Celsius(11.))
+        );
     }
-    pub fn add_device(&mut self, room: &str, device: SmartDevice) {
-        self.0
-            .entry(room.to_owned())
-            .or_insert(Vec::new())
-            .push(device);
-    }
-}
-impl DeviceInfoProvider for SmartDeviceList {
-    fn get_device_info(&self, room: &str, device: &str) -> Option<DeviceInfo> {
-        let room_devices = self.0.get(room).unwrap();
-        let device = room_devices.iter().find(|&d| d.get_name() == device)?;
-        Some(DeviceInfo {
-            kind: device.get_type(),
-            name: device.get_name(),
-            state: device.get_state(),
-        })
+
+    #[test]
+    fn create_socket() {
+        let socket = PowerSocket {
+            name: "socket".to_owned(),
+            state: PowerSocketState::NotPowered,
+            power_consumption: 0,
+            description: "smart power socket".to_owned(),
+        };
+        let device = SmartDevice::Socket(socket);
+        assert_eq!(device.get_name(), "socket");
     }
 }
