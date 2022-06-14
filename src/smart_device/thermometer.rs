@@ -1,4 +1,3 @@
-
 /// # Temperature conversion test
 /// ```
 /// use smart_house::Temperature;
