@@ -51,3 +51,12 @@ impl Thermometer {
         self.state
     }
 }
+
+#[derive(Debug, Default)]
+pub struct ThermometerError {}
+
+impl ThermometerError {
+    pub fn get_message(&self) -> String {
+        "thermometer error".into()
+    }
+}

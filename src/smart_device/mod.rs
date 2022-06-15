@@ -1,8 +1,8 @@
 mod power_socket;
 mod thermometer;
 
-pub use power_socket::{PowerSocket, PowerSocketState};
-pub use thermometer::{Temperature, Thermometer};
+pub use power_socket::{PowerSocket, PowerSocketState, SocketError};
+pub use thermometer::{Temperature, Thermometer, ThermometerError};
 
 #[derive(Debug)]
 pub enum SmartDevice {

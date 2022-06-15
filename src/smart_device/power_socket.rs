@@ -40,3 +40,12 @@ pub enum PowerSocketState {
     Powered,
     NotPowered,
 }
+
+#[derive(Debug, Default)]
+pub struct SocketError {}
+
+impl SocketError {
+    pub fn get_message(&self) -> String {
+        "socket error".into()
+    }
+}
