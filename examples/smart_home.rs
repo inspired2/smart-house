@@ -1,8 +1,8 @@
 use smart_house::{PowerSocket, PowerSocketState};
-use smart_house::{Room, SmartDevice, SmartDeviceList, SmartHouse};
+use smart_house::{Room, SmartDevice, SmartDeviceList, SmartHouse, CustomResult};
 use smart_house::{Temperature, Thermometer};
 
-fn main() -> Result<(), &'static str> {
+fn main() -> CustomResult<()> {
     //create house:
     let mut house = SmartHouse::new();
 

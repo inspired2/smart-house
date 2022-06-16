@@ -1,10 +1,7 @@
-use crate::device_info_provider::DeviceInfoProvider;
+use crate::{device_info_provider::DeviceInfoProvider, CustomError};
 use std::collections::HashSet;
 
-#[derive(Default, Debug)]
-pub struct SmartHouse {
-    rooms: Vec<Room>,
-}
+pub type CustomResult<T> = Result<T, CustomError>;
 
 #[derive(Debug)]
 pub struct Room {
@@ -18,14 +15,20 @@ impl Room {
             devices: HashSet::new(),
         }
     }
-    pub fn try_add_device(&mut self, name: &str) -> Result<(), &'static str> {
+    pub fn try_add_device(&mut self, name: &str) -> CustomResult<()> {
         if let false = self.devices.insert(name.to_lowercase()) {
-            return Err("device with the same name already present");
+            return Err(CustomError::AddDeviceError);
         }
         Ok(())
     }
 }
 
+#[derive(Default, Debug)]
+pub struct SmartHouse {
+    rooms: Vec<Room>,
+}
+
+ 
 impl SmartHouse {
     pub fn new() -> Self {
         Self { rooms: Vec::new() }
@@ -34,13 +37,13 @@ impl SmartHouse {
         self.rooms.iter().map(|r| r.name.as_str()).collect()
     }
 
-    pub fn try_add_room(&mut self, room: Room) -> Result<(), &'static str> {
+    pub fn try_add_room(&mut self, room: Room) -> CustomResult<()> {
         if self
             .rooms
             .iter()
             .any(|r| r.name.to_lowercase() == room.name.to_lowercase())
         {
-            return Err("room with similiar name already in the house");
+            return Err(CustomError::AddRoomError);
         }
         self.rooms.push(room);
         Ok(())
@@ -65,7 +68,7 @@ impl SmartHouse {
                 let device_info: String = provider
                     .get_device_info(room, &device)
                     .map(|i| format!("{:?}", i))
-                    .unwrap_or_else(|| "device not found".to_string());
+                    .unwrap_or_else(|err| err.to_string());
                 report += &format!("room: {}, device: {}\n", room, device_info);
             }
         }
@@ -75,10 +78,10 @@ impl SmartHouse {
         &'b mut self,
         room: &'a str,
         device: &'a str,
-    ) -> Result<(), &'static str> {
+    ) -> CustomResult<()> {
         if let Some(room) = self.get_room_mut(room) {
             return room.try_add_device(device);
         }
-        Err("no such room")
+        Err(CustomError::AddDeviceError)
     }
 }

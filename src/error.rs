@@ -1,16 +1,17 @@
 use crate::{SocketError, ThermometerError};
 use std::{error::Error, fmt::Debug, fmt::Display};
+
 #[derive(Debug)]
-pub enum CustomError<D: DeviceError + Sized> {
-    DeviceFailure(D),
+pub enum CustomError {
+    DeviceFailure(Box<dyn DeviceError>),
     AddRoomError,
     AddDeviceError,
+    DeviceNotFound,
+    RoomNotFound,
 }
 
-impl<D> Error for CustomError<D> where D: DeviceError + Sized {}
-impl<D> Display for CustomError<D>
-where
-    D: DeviceError,
+impl Error for CustomError {}
+impl Display for CustomError
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use CustomError::*;
@@ -18,6 +19,8 @@ where
             DeviceFailure(err) => write!(f, "error: {:?}, message: {}", err, err.message()),
             AddRoomError => write!(f, "add room error"),
             AddDeviceError => write!(f, "add device error"),
+            DeviceNotFound => write!(f, "device not found"),
+            RoomNotFound => write!(f, "room not found"),
         }
     }
 }
