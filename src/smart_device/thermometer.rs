@@ -1,3 +1,5 @@
+use derive_more::Display;
+
 #[derive(Clone, Copy, Debug)]
 pub enum Temperature {
     Celsius(f32),
@@ -40,20 +42,14 @@ impl Thermometer {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Display, Default)]
 pub struct ThermometerError {}
-
-impl ThermometerError {
-    pub fn get_message(&self) -> String {
-        "thermometer error".into()
-    }
-}
 
 #[cfg(test)]
 mod test {
     use super::Temperature;
     #[test]
-    fn temperature_conversion() {
+    fn temperature_convertion() {
         assert_eq!(Temperature::Celsius(-10.).as_fahrenheit(), 14);
         assert_eq!(Temperature::Fahrenheit(35.).as_fahrenheit(), 35);
         assert_eq!(Temperature::Celsius(31.).as_fahrenheit(), 88);

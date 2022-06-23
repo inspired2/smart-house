@@ -28,12 +28,11 @@ pub struct SmartHouse {
     rooms: Vec<Room>,
 }
 
- 
 impl SmartHouse {
     pub fn new() -> Self {
         Self { rooms: Vec::new() }
     }
-    fn get_rooms(&self) -> Vec<&str> {
+    pub fn get_rooms(&self) -> Vec<&str> {
         self.rooms.iter().map(|r| r.name.as_str()).collect()
     }
 
@@ -53,20 +52,20 @@ impl SmartHouse {
             .iter_mut()
             .find(|r| r.name.to_lowercase() == room_name.to_lowercase())
     }
-    fn get_devices(&self, room: &str) -> Vec<String> {
+    pub fn get_devices(&self, room: &str) -> Vec<&str> {
         let devices = Vec::new();
         let room = self.rooms.iter().find(|&r| r.name == room);
         if room.is_none() {
             return devices;
         };
-        room.unwrap().devices.iter().map(|d| d.to_owned()).collect()
+        room.unwrap().devices.iter().map(|d| d.as_str()).collect()
     }
     pub fn get_report<T: DeviceInfoProvider>(&self, provider: T) -> String {
         let mut report = String::new();
         for &room in self.get_rooms().iter() {
             for device in self.get_devices(room) {
                 let device_info: String = provider
-                    .get_device_info(room, &device)
+                    .get_device_info(room, device)
                     .map(|i| format!("{:?}", i))
                     .unwrap_or_else(|err| err.to_string());
                 report += &format!("room: {}, device: {}\n", room, device_info);

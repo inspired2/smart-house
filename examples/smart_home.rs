@@ -1,8 +1,10 @@
+use std::error::Error;
+
 use smart_house::{PowerSocket, PowerSocketState};
-use smart_house::{Room, SmartDevice, SmartDeviceList, SmartHouse, CustomResult};
+use smart_house::{Room, SmartDevice, SmartDeviceList, SmartHouse};
 use smart_house::{Temperature, Thermometer};
 
-fn main() -> CustomResult<()> {
+fn main() -> Result<(), Box<dyn Error + 'static>> {
     //create house:
     let mut house = SmartHouse::new();
 
@@ -21,11 +23,11 @@ fn main() -> CustomResult<()> {
     });
 
     //create rooms:
-    //
+
     let mut room1 = Room::with_name("room1");
     let room2 = Room::with_name("room2");
 
-    //we can add devices to rooms directly:
+    //add devices to rooms directly:
     //note that devices are stored as text ids
     //devices as entities are stored separately - in some device list
     room1.try_add_device("Therm1")?;
@@ -38,10 +40,14 @@ fn main() -> CustomResult<()> {
     //add device to the house:
     house.try_add_device("room2", "Socket1")?;
 
+    //create storage for devices:
     let mut device_list = SmartDeviceList::new();
-    device_list.add_device("room1", device1);
-    device_list.add_device("room2", device2);
+    //and add devices:
+    //will fail if device with same name (case insensitive) already present.
+    device_list.add_device("room1", device1)?;
+    device_list.add_device("room2", device2)?;
 
+    //get_report method is generic over some type that implements DeviceInfoProvider trait;
     let report = house.get_report(device_list);
     println!("{}", report);
 

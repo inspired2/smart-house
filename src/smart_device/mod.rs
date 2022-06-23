@@ -1,6 +1,8 @@
 mod power_socket;
 mod thermometer;
 
+use std::any::Any;
+
 pub use power_socket::{PowerSocket, PowerSocketState, SocketError};
 pub use thermometer::{Temperature, Thermometer, ThermometerError};
 
@@ -9,7 +11,17 @@ pub enum SmartDevice {
     Thermo(Thermometer),
     Socket(PowerSocket),
 }
+
 impl SmartDevice {
+    pub fn from(device: Box<dyn Any>) -> Self {
+        if device.is::<Thermometer>() {
+            return Self::Thermo(*(device.downcast::<Thermometer>().unwrap()));
+        } else if device.is::<PowerSocket>() {
+            return Self::Socket(*(device.downcast::<PowerSocket>().unwrap()));
+        } else {
+            panic!("unknown device");
+        }
+    }
     pub fn get_name(&self) -> String {
         match self {
             SmartDevice::Socket(s) => s.name.to_owned(),
@@ -27,6 +39,27 @@ impl SmartDevice {
             SmartDevice::Socket(_) => "SmartSocket".to_owned(),
             SmartDevice::Thermo(_) => "SmartThermometer".to_owned(),
         }
+    }
+}
+pub trait Device: Any {
+    fn get_self(self) -> Self
+    where
+        Self: Sized;
+}
+impl Device for Thermometer {
+    fn get_self(self) -> Thermometer
+    where
+        Self: Sized,
+    {
+        self
+    }
+}
+impl Device for PowerSocket {
+    fn get_self(self) -> PowerSocket
+    where
+        Self: Sized,
+    {
+        self
     }
 }
 

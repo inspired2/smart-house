@@ -1,3 +1,6 @@
+use derive_more::Display;
+use std::error::Error;
+
 #[derive(Clone, Debug)]
 pub struct PowerSocket {
     pub name: String,
@@ -41,11 +44,6 @@ pub enum PowerSocketState {
     NotPowered,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Display, Default)]
 pub struct SocketError {}
-
-impl SocketError {
-    pub fn get_message(&self) -> String {
-        "socket error".into()
-    }
-}
+impl Error for SocketError {}
