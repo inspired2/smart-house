@@ -40,6 +40,7 @@ fn create_devices_storage() -> impl DeviceInfoProvider {
 
     let socket1 = create_powersocket("socket1");
     let socket2 = create_powersocket("socket2");
+
     let therm1 = create_thermometer("therm1");
     let therm2 = create_thermometer("therm2");
 
@@ -113,9 +114,10 @@ fn report_contains_error_if_no_device() {
     let mut house = create_house();
     house.try_add_device("hall", "therm1").unwrap();
     house.try_add_device("hall", "therm2").unwrap();
-    house.try_add_device("hall", "socket1").unwrap();
+    house.try_add_device("hall", "socket").unwrap();
 
     let storage = create_devices_storage();
     let report = house.get_report(storage);
-    assert!(report.contains("DeviceNotFound"));
+    println!("{}", report);
+    assert!(report.contains("device not found"));
 }
