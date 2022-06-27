@@ -21,6 +21,15 @@ impl Room {
         }
         Ok(())
     }
+    pub fn try_remove_device(&mut self, name: &str) -> CustomResult<()> {
+        self.devices
+            .remove(name)
+            .then(|| ())
+            .ok_or(CustomError::DeviceNotFound)
+    }
+    pub fn get_name(&self) -> &str {
+        &self.name
+    }
 }
 
 #[derive(Default, Debug)]
@@ -82,5 +91,20 @@ impl SmartHouse {
             return room.try_add_device(device);
         }
         Err(CustomError::AddDeviceError)
+    }
+    pub fn try_remove_device(&mut self, room: &str, device: &str) -> CustomResult<()> {
+        self.get_room_mut(room)
+            .map_or(Err(CustomError::DeviceNotFound), |room| {
+                room.try_remove_device(device)
+            })
+    }
+    pub fn try_remove_room(&mut self, name: &str) -> CustomResult<()> {
+        let pos = self
+            .rooms
+            .iter()
+            .position(|r| r.get_name() == name)
+            .ok_or(CustomError::RoomNotFound)?;
+        self.rooms.swap_remove(pos);
+        Ok(())
     }
 }

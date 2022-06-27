@@ -51,8 +51,8 @@ fn create_devices_storage() -> impl DeviceInfoProvider {
         Box::new(therm2),
     ];
 
-    let mut vec: Vec<SmartDevice> = collection.into_iter().map(|d| create_device(d)).collect();
-    vec.drain(..).for_each(|dev| {
+    let vec: Vec<SmartDevice> = collection.into_iter().map(|d| create_device(d)).collect();
+    vec.into_iter().for_each(|dev| {
         storage.add_device("hall", dev).ok();
     });
     storage

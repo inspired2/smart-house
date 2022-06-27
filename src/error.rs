@@ -20,7 +20,9 @@ impl Display for CustomError {
                     f,
                     "error: {:?}, message: {:?}",
                     err,
-                    err.source().unwrap().to_string()
+                    err.source()
+                        .map(|e| e.to_string())
+                        .unwrap_or_else(|| "unknown error".to_string())
                 )
             }
             AddRoomError => write!(f, "add room error"),
