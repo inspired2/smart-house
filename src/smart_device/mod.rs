@@ -1,8 +1,10 @@
 mod power_socket;
 mod thermometer;
+mod command;
 
 use std::any::Any;
 
+pub use command::{Command, CommandData, Executable, PowerSocketCommand, DeviceCommand};
 pub use power_socket::{PowerSocket, PowerSocketState, SocketError};
 pub use thermometer::{Temperature, Thermometer, ThermometerError};
 

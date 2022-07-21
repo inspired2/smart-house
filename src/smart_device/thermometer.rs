@@ -1,4 +1,5 @@
 use derive_more::Display;
+use crate::Executable;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Temperature {
