@@ -1,5 +1,7 @@
-use derive_more::Display;
 use crate::Executable;
+use derive_more::Display;
+
+use super::command::ExecutionResult;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Temperature {
@@ -42,7 +44,14 @@ impl Thermometer {
         self.state
     }
 }
-
+impl Executable for Thermometer {
+    fn execute(
+        &mut self,
+        _command: crate::DeviceCommand,
+    ) -> Result<ExecutionResult, Box<dyn std::error::Error>> {
+        todo!()
+    }
+}
 #[derive(Debug, Display, Default)]
 pub struct ThermometerError {}
 

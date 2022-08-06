@@ -1,5 +1,5 @@
-use crate::{CustomError, CustomResult, SmartDevice, Command, CommandData};
-use dashmap::{DashMap, mapref::one::RefMut};
+use crate::{CommandData, CustomError, CustomResult, ExecutionResult, SmartDevice};
+use dashmap::DashMap;
 use std::sync::Arc;
 
 pub trait DeviceInfoProvider {
@@ -15,7 +15,11 @@ pub struct DeviceInfo {
 
 #[derive(Debug)]
 pub struct SmartDeviceList(Arc<DashMap<String, Vec<SmartDevice>>>);
-
+impl Default for SmartDeviceList {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl SmartDeviceList {
     pub fn new() -> Self {
         Self(Arc::new(DashMap::new()))
@@ -34,29 +38,19 @@ impl SmartDeviceList {
             true => Err(CustomError::AddDeviceError),
         }
     }
-    pub fn room_with_device_ref_mut(&mut self, device_name: &str) -> Option<(RefMut<'_,String, Vec<SmartDevice>>, usize)> {
-        for room in self.0.iter() {
-            for (idx, device) in room.iter().enumerate() {
+    pub fn execute_command(&mut self, cmd: CommandData) -> CustomResult<ExecutionResult> {
+        let CommandData { device_name, data } = cmd;
+        for mut room in self.0.iter_mut() {
+            for device in room.iter_mut() {
                 if device.get_name() == device_name {
-                    return Some((self.0.get_mut(room.key()).unwrap(), idx))
+                    return device
+                        .execute_command(data)
+                        .map_err(|e| CustomError::DeviceFailure(e.to_string()));
                 }
             }
         }
-        None
+        Err(CustomError::DeviceNotFound)
     }
-    pub fn execute_command(&mut self, cmd: CommandData) -> CustomResult<()> {
-        match cmd {
-            CommandData {device_name, data } => {
-                if let Some((mut room, idx)) = self.room_with_device_ref_mut(&device_name) {
-                    //SAFETY: already checked that device is present at idx
-                    let device = unsafe { room.get_unchecked_mut(idx)};
-                    //device.change_state(data)
-                }
-            }
-        }
-        Ok(())
-    }
-
 }
 impl DeviceInfoProvider for SmartDeviceList {
     fn get_device_info(&self, room: &str, device: &str) -> CustomResult<DeviceInfo> {

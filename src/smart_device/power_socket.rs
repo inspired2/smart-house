@@ -1,7 +1,10 @@
-use derive_more::Display;
-use crate::{ DeviceCommand, PowerSocketCommand };
 use crate::Executable;
+use crate::{DeviceCommand, PowerSocketCommand};
+use derive_more::Display;
+use serde::{Deserialize, Serialize};
 use std::error::Error;
+
+use super::command::ExecutionResult;
 
 #[derive(Clone, Debug)]
 pub struct PowerSocket {
@@ -11,16 +14,18 @@ pub struct PowerSocket {
     pub power_consumption: u8,
 }
 impl Executable for PowerSocket {
-    fn execute(&mut self, command: DeviceCommand) -> Result<(), Box<dyn std::error::Error>> {
+    fn execute(
+        &mut self,
+        command: DeviceCommand,
+    ) -> Result<ExecutionResult, Box<dyn std::error::Error>> {
         match command {
             DeviceCommand::PowerSocket(cmd) => {
                 match cmd {
-                    PowerSocketCommand::TurnOff => {self.turn_off()},
-                    PowerSocketCommand::TurnOn => {self.turn_on()}
+                    PowerSocketCommand::TurnOff => self.turn_off(),
+                    PowerSocketCommand::TurnOn => self.turn_on(),
                 };
-                Ok(())
-            },
-            _=> { Err("command cannot be executed".into())}
+                Ok(ExecutionResult::PowerSocket(self.get_state()))
+            }
         }
     }
 }
@@ -54,7 +59,7 @@ impl PowerSocket {
         matches!(self.state, PowerSocketState::Powered)
     }
 }
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum PowerSocketState {
     Powered,
     NotPowered,

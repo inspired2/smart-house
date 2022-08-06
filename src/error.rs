@@ -1,13 +1,16 @@
 use std::{error::Error, fmt::Debug, fmt::Display};
 
-#[derive(Debug)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum CustomError {
-    DeviceFailure(Box<dyn Error + 'static>),
+    DeviceFailure(String),
     AddRoomError,
     AddDeviceError,
     DeviceNotFound,
     RoomNotFound,
     Unknown,
+    CommandExecutionFailure,
 }
 
 impl Error for CustomError {}
@@ -16,19 +19,13 @@ impl Display for CustomError {
         use CustomError::*;
         match self {
             DeviceFailure(err) => {
-                write!(
-                    f,
-                    "error: {:?}, message: {:?}",
-                    err,
-                    err.source()
-                        .map(|e| e.to_string())
-                        .unwrap_or_else(|| "unknown error".to_string())
-                )
+                write!(f, "error: {:?}", err)
             }
             AddRoomError => write!(f, "add room error"),
             AddDeviceError => write!(f, "add device error"),
             DeviceNotFound => write!(f, "device not found"),
             RoomNotFound => write!(f, "room not found"),
+            CommandExecutionFailure => write!(f, "failed to execute command"),
             Unknown => write!(f, "unknown error"),
         }
     }

@@ -1,10 +1,12 @@
+mod command;
 mod power_socket;
 mod thermometer;
-mod command;
 
 use std::any::Any;
 
-pub use command::{Command, CommandData, Executable, PowerSocketCommand, DeviceCommand};
+pub use command::{
+    Command, CommandData, DeviceCommand, Executable, ExecutionResult, PowerSocketCommand,
+};
 pub use power_socket::{PowerSocket, PowerSocketState, SocketError};
 pub use thermometer::{Temperature, Thermometer, ThermometerError};
 
@@ -40,6 +42,15 @@ impl SmartDevice {
         match self {
             SmartDevice::Socket(_) => "SmartSocket".to_owned(),
             SmartDevice::Thermo(_) => "SmartThermometer".to_owned(),
+        }
+    }
+    pub fn execute_command(
+        &mut self,
+        cmd: DeviceCommand,
+    ) -> Result<ExecutionResult, Box<dyn std::error::Error>> {
+        match self {
+            SmartDevice::Socket(sock) => sock.execute(cmd),
+            SmartDevice::Thermo(therm) => therm.execute(cmd),
         }
     }
 }

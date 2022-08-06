@@ -1,19 +1,46 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug,Serialize, Deserialize)]
+use crate::PowerSocketState;
+
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Command {
     Exit,
     Execute(CommandData),
     Unknown,
 }
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum DeviceCommand {
-    PowerSocket(PowerSocketCommand)
+    PowerSocket(PowerSocketCommand),
 }
-#[derive(Debug, Serialize, Deserialize)]
+impl DeviceCommand {
+    fn from_u8(n: u8) -> Result<Self, Box<dyn std::error::Error>> {
+        let s = n.to_string();
+        let mut iter = s.chars().rev();
+        let cmd_code = iter.next().unwrap().to_digit(10).unwrap();
+        let device_code = iter.next().unwrap().to_digit(10).unwrap();
+        match (device_code, cmd_code) {
+            (1, _) => Ok(DeviceCommand::PowerSocket(PowerSocketCommand::from_u8(
+                cmd_code as u8,
+            )?)),
+            _ => Err("Unknown device code in command code".into()),
+        }
+    }
+}
+#[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum PowerSocketCommand {
     TurnOn,
-    TurnOff
+    TurnOff,
+}
+impl PowerSocketCommand {
+    fn from_u8(n: u8) -> Result<Self, Box<dyn std::error::Error>> {
+        let cmd: Self = 
+        match n {
+            1 => Self::TurnOn,
+            0 => Self::TurnOff,
+            _ => return Err("Unknown PowerSocketCommand code".into()),
+        };
+        Ok(cmd)
+    }
 }
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CommandData {
@@ -21,19 +48,28 @@ pub struct CommandData {
     pub data: DeviceCommand,
 }
 
-// impl From<String> for Command {
-//     fn from(s: String) -> Self {
-//         serde_json::from_str(&s).unwrap()
-//     }
-// }
-// impl From<String> for CommandData {
-//     fn from(s: String) -> Self {
-//         let v: Vec<&str> = s.split("|").collect();
-//         let device_name = v[0].trim().to_owned();
-//         let data = v[1].trim().to_owned();
-//         CommandData { device_name, data }
-//     }
-// }
+impl From<(String, u8)> for Command {
+    fn from(key_code: (String, u8)) -> Self {
+        match key_code.0 {
+            s if s.is_empty() || &s.to_lowercase() == "exit" => Command::Exit,
+            s => {
+                if let Ok(data) = DeviceCommand::from_u8(key_code.1) {
+                    Command::Execute(CommandData { device_name: s, data })
+                } else {
+                    Command::Unknown
+                }
+            }
+        }
+    }
+}
+#[derive(Debug, Serialize, Deserialize)]
+pub enum ExecutionResult {
+    PowerSocket(PowerSocketState),
+    Error(crate::error::CustomError),
+}
 pub trait Executable {
-    fn execute(&mut self, command: DeviceCommand) -> Result<(), Box<dyn std::error::Error>>;
+    fn execute(
+        &mut self,
+        command: DeviceCommand,
+    ) -> Result<ExecutionResult, Box<dyn std::error::Error>>;
 }
