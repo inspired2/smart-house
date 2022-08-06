@@ -11,7 +11,7 @@ pub struct PowerSocket {
     pub name: String,
     pub state: PowerSocketState,
     pub description: String,
-    pub power_consumption: u8,
+    pub power_consumption: u16,
 }
 impl Executable for PowerSocket {
     fn execute(
@@ -23,6 +23,7 @@ impl Executable for PowerSocket {
                 match cmd {
                     PowerSocketCommand::TurnOff => self.turn_off(),
                     PowerSocketCommand::TurnOn => self.turn_on(),
+                    PowerSocketCommand::GetState => {self.get_state();}
                 };
                 Ok(ExecutionResult::PowerSocket(self.get_state()))
             }
@@ -30,7 +31,7 @@ impl Executable for PowerSocket {
     }
 }
 impl PowerSocket {
-    pub fn get_power_consumption(&self) -> u8 {
+    pub fn get_power_consumption(&self) -> u16 {
         self.power_consumption
     }
 
@@ -42,7 +43,8 @@ impl PowerSocket {
         if self.is_turned_on() {
             return;
         }
-        self.state = PowerSocketState::Powered
+        self.power_consumption = 220;
+        self.state = PowerSocketState::Powered(self.power_consumption);
     }
 
     pub fn turn_off(&mut self) {
@@ -56,12 +58,12 @@ impl PowerSocket {
     }
 
     fn is_turned_on(&self) -> bool {
-        matches!(self.state, PowerSocketState::Powered)
+        matches!(self.state, PowerSocketState::Powered(_))
     }
 }
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum PowerSocketState {
-    Powered,
+    Powered(u16),
     NotPowered,
 }
 

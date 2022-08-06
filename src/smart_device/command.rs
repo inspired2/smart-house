@@ -30,11 +30,13 @@ impl DeviceCommand {
 pub enum PowerSocketCommand {
     TurnOn,
     TurnOff,
+    GetState
 }
 impl PowerSocketCommand {
     fn from_u8(n: u8) -> Result<Self, Box<dyn std::error::Error>> {
         let cmd: Self = 
         match n {
+            2 => Self::GetState,
             1 => Self::TurnOn,
             0 => Self::TurnOff,
             _ => return Err("Unknown PowerSocketCommand code".into()),
