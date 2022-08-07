@@ -4,7 +4,6 @@ use crate::PowerSocketState;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Command {
-    Exit,
     Execute(CommandData),
     Unknown,
 }
@@ -53,7 +52,6 @@ pub struct CommandData {
 impl From<(String, u8)> for Command {
     fn from(key_code: (String, u8)) -> Self {
         match key_code.0 {
-            s if s.is_empty() || &s.to_lowercase() == "exit" => Command::Exit,
             s => {
                 if let Ok(data) = DeviceCommand::from_u8(key_code.1) {
                     Command::Execute(CommandData { device_name: s, data })
