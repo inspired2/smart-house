@@ -123,3 +123,25 @@ fn report_contains_error_if_no_device() {
     println!("{}", report);
     assert!(report.contains("device not found"));
 }
+
+#[test]
+fn add_remove_room() {
+    let house = SmartHouse::new();
+    assert!(house.get_rooms().is_empty());
+
+    let livingroom = Room::with_name("livingroom");
+    assert_eq!(house.get_rooms().len(), 1);
+
+    house.try_remove_room("livingroom").unwrap();
+    assert!(house.get_rooms().is_empty());
+}
+
+#[test]
+fn add_remove_device() {
+    let house = create_house();
+    let pow_socket = create_powersocket("socket");
+    let therm = create_thermometer("therm");
+    house.try_add_device("livingroom", "therm").unwrap();
+    house.try_add_device("hall", "socket").unwrap();
+    house.get_rooms().iter().map(|room| house.get_devices(room)).flatten().count()
+}
