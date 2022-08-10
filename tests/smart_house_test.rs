@@ -126,22 +126,44 @@ fn report_contains_error_if_no_device() {
 
 #[test]
 fn add_remove_room() {
-    let house = SmartHouse::new();
+    let mut house = SmartHouse::new();
+    //new house has no rooms:
     assert!(house.get_rooms().is_empty());
 
     let livingroom = Room::with_name("livingroom");
+    house.try_add_room(livingroom).unwrap();
+
+    //added room is in the house:
     assert_eq!(house.get_rooms().len(), 1);
 
+    //rooms with same names are not allowed:
+    let livingroom = Room::with_name("livingroom");
+    assert!(house.try_add_room(livingroom).is_err());
+
+    //removing existing room is ok:
     house.try_remove_room("livingroom").unwrap();
     assert!(house.get_rooms().is_empty());
+
+    //removing non-existent room is error:
+    assert!(house.try_remove_room("livingroom").is_err());
 }
 
 #[test]
 fn add_remove_device() {
-    let house = create_house();
-    let pow_socket = create_powersocket("socket");
-    let therm = create_thermometer("therm");
+    let mut house = create_house();
+
     house.try_add_device("livingroom", "therm").unwrap();
     house.try_add_device("hall", "socket").unwrap();
+
+    //adding devices is ok:
+    assert_eq!(count_devices(&mut house), 2);
+
+    house.try_remove_device("livingroom", "therm").unwrap();
+    house.try_remove_device("hall", "socket").unwrap();
+
+    //removing devices is ok:
+    assert_eq!(count_devices(&mut house), 0);
+}
+fn count_devices(house: &mut SmartHouse) -> usize {
     house.get_rooms().iter().map(|room| house.get_devices(room)).flatten().count()
 }
