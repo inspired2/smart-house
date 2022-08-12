@@ -20,6 +20,7 @@ impl Default for SmartDeviceList {
         Self::new()
     }
 }
+
 impl SmartDeviceList {
     pub fn new() -> Self {
         Self(Arc::new(DashMap::new()))
@@ -38,7 +39,7 @@ impl SmartDeviceList {
             true => Err(CustomError::AddDeviceError),
         }
     }
-    pub fn execute_command(&mut self, cmd: CommandData) -> CustomResult<ExecutionResult> {
+    pub fn execute_command(&self, cmd: CommandData) -> CustomResult<ExecutionResult> {
         let CommandData { device_name, data } = cmd;
         for mut room in self.0.iter_mut() {
             for device in room.iter_mut() {
