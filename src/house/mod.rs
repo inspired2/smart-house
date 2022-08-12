@@ -1,5 +1,6 @@
 use crate::{device_info_provider::DeviceInfoProvider, CustomError};
 use std::collections::HashSet;
+use std::fmt::Write;
 
 pub type CustomResult<T> = Result<T, CustomError>;
 
@@ -77,7 +78,7 @@ impl SmartHouse {
                     .get_device_info(room, device)
                     .map(|i| format!("{:?}", i))
                     .unwrap_or_else(|err| err.to_string());
-                report += &format!("room: {}, device: {}\n", room, device_info);
+                writeln!(&mut report, "room: {}, device: {}\n", room, device_info).unwrap();
             }
         }
         report

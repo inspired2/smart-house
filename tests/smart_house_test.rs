@@ -165,5 +165,10 @@ fn add_remove_device() {
     assert_eq!(count_devices(&mut house), 0);
 }
 fn count_devices(house: &mut SmartHouse) -> usize {
-    house.get_rooms().iter().map(|room| house.get_devices(room)).flatten().count()
+    house
+        .get_rooms()
+        .iter()
+        .map(|room| house.get_devices(room))
+        .flatten()
+        .count()
 }

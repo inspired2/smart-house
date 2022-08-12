@@ -23,7 +23,9 @@ impl Executable for PowerSocket {
                 match cmd {
                     PowerSocketCommand::TurnOff => self.turn_off(),
                     PowerSocketCommand::TurnOn => self.turn_on(),
-                    PowerSocketCommand::GetState => {self.get_state();}
+                    PowerSocketCommand::GetState => {
+                        self.get_state();
+                    }
                 };
                 Ok(ExecutionResult::PowerSocket(self.get_state()))
             }

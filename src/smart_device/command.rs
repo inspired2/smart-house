@@ -29,12 +29,11 @@ impl DeviceCommand {
 pub enum PowerSocketCommand {
     TurnOn,
     TurnOff,
-    GetState
+    GetState,
 }
 impl PowerSocketCommand {
     fn from_u8(n: u8) -> Result<Self, Box<dyn std::error::Error>> {
-        let cmd: Self = 
-        match n {
+        let cmd: Self = match n {
             2 => Self::GetState,
             1 => Self::TurnOn,
             0 => Self::TurnOff,
@@ -51,14 +50,14 @@ pub struct CommandData {
 
 impl From<(String, u8)> for Command {
     fn from(key_code: (String, u8)) -> Self {
-        match key_code.0 {
-            s => {
-                if let Ok(data) = DeviceCommand::from_u8(key_code.1) {
-                    Command::Execute(CommandData { device_name: s, data })
-                } else {
-                    Command::Unknown
-                }
-            }
+        let s = key_code.0;
+        if let Ok(data) = DeviceCommand::from_u8(key_code.1) {
+            Command::Execute(CommandData {
+                device_name: s,
+                data,
+            })
+        } else {
+            Command::Unknown
         }
     }
 }
