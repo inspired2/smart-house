@@ -1,10 +1,8 @@
-use std::error::Error;
-
+use smart_house::{CustomResult, Room, SmartDevice, SmartDeviceList, SmartHouse};
 use smart_house::{PowerSocket, PowerSocketState};
-use smart_house::{Room, SmartDevice, SmartDeviceList, SmartHouse};
 use smart_house::{Temperature, Thermometer};
 
-fn main() -> Result<(), Box<dyn Error + 'static>> {
+fn main() -> CustomResult<()> {
     //create house:
     let mut house = SmartHouse::new();
 

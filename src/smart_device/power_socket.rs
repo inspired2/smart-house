@@ -1,3 +1,4 @@
+use crate::house::CustomResult;
 use crate::Executable;
 use crate::{DeviceCommand, PowerSocketCommand};
 use derive_more::Display;
@@ -14,10 +15,7 @@ pub struct PowerSocket {
     pub power_consumption: u16,
 }
 impl Executable for PowerSocket {
-    fn execute(
-        &mut self,
-        command: DeviceCommand,
-    ) -> Result<ExecutionResult, Box<dyn std::error::Error>> {
+    fn execute(&mut self, command: DeviceCommand) -> CustomResult<ExecutionResult> {
         match command {
             DeviceCommand::PowerSocket(cmd) => {
                 match cmd {

@@ -11,4 +11,4 @@ pub use smart_device::{
 };
 
 use error::CustomError;
-use house::CustomResult;
+pub use house::CustomResult;

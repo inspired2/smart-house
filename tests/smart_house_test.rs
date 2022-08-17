@@ -168,7 +168,6 @@ fn count_devices(house: &mut SmartHouse) -> usize {
     house
         .get_rooms()
         .iter()
-        .map(|room| house.get_devices(room))
-        .flatten()
+        .flat_map(|room| house.get_devices(room))
         .count()
 }

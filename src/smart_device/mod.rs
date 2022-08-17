@@ -8,7 +8,9 @@ pub use command::{
     Command, CommandData, DeviceCommand, Executable, ExecutionResult, PowerSocketCommand,
 };
 pub use power_socket::{PowerSocket, PowerSocketState, SocketError};
-pub use thermometer::{Temperature, Thermometer, ThermometerError};
+pub use thermometer::{Temperature, Thermometer};
+
+use crate::house::CustomResult;
 
 #[derive(Debug)]
 pub enum SmartDevice {
@@ -44,10 +46,7 @@ impl SmartDevice {
             SmartDevice::Thermo(_) => "SmartThermometer".to_owned(),
         }
     }
-    pub fn execute_command(
-        &mut self,
-        cmd: DeviceCommand,
-    ) -> Result<ExecutionResult, Box<dyn std::error::Error>> {
+    pub fn execute_command(&mut self, cmd: DeviceCommand) -> CustomResult<ExecutionResult> {
         match self {
             SmartDevice::Socket(sock) => sock.execute(cmd),
             SmartDevice::Thermo(therm) => therm.execute(cmd),

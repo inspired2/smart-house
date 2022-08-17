@@ -10,3 +10,4 @@ derive_more = "0.99.17"
 dashmap = "*"
 serde = {features = ["derive"], version = "1.0.137"}
 serde_json = "1.0.82"
+thiserror = "1"

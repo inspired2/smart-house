@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::PowerSocketState;
+use crate::{error::CustomError, house::CustomResult, PowerSocketState};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Command {
@@ -12,7 +12,7 @@ pub enum DeviceCommand {
     PowerSocket(PowerSocketCommand),
 }
 impl DeviceCommand {
-    fn from_u8(n: u8) -> Result<Self, Box<dyn std::error::Error>> {
+    fn from_u8(n: u8) -> CustomResult<Self> {
         let s = n.to_string();
         let mut iter = s.chars().rev();
         let cmd_code = iter.next().unwrap().to_digit(10).unwrap();
@@ -21,7 +21,9 @@ impl DeviceCommand {
             (1, _) => Ok(DeviceCommand::PowerSocket(PowerSocketCommand::from_u8(
                 cmd_code as u8,
             )?)),
-            _ => Err("Unknown device code in command code".into()),
+            _ => Err(CustomError::CommandExecutionFailure(
+                "Unknown device code in command code".into(),
+            )),
         }
     }
 }
@@ -32,12 +34,16 @@ pub enum PowerSocketCommand {
     GetState,
 }
 impl PowerSocketCommand {
-    fn from_u8(n: u8) -> Result<Self, Box<dyn std::error::Error>> {
+    fn from_u8(n: u8) -> Result<Self, CustomError> {
         let cmd: Self = match n {
             2 => Self::GetState,
             1 => Self::TurnOn,
             0 => Self::TurnOff,
-            _ => return Err("Unknown PowerSocketCommand code".into()),
+            _ => {
+                return Err(CustomError::CommandExecutionFailure(
+                    "Unknown PowerSocketCommand code".into(),
+                ))
+            }
         };
         Ok(cmd)
     }
@@ -67,8 +73,5 @@ pub enum ExecutionResult {
     Error(crate::error::CustomError),
 }
 pub trait Executable {
-    fn execute(
-        &mut self,
-        command: DeviceCommand,
-    ) -> Result<ExecutionResult, Box<dyn std::error::Error>>;
+    fn execute(&mut self, command: DeviceCommand) -> CustomResult<ExecutionResult>;
 }

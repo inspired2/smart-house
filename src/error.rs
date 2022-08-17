@@ -1,32 +1,21 @@
-use std::{error::Error, fmt::Debug, fmt::Display};
-
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
+use thiserror::Error;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Error)]
 pub enum CustomError {
+    #[error("Error in device: {0}")]
     DeviceFailure(String),
+    #[error("Cannot add room")]
     AddRoomError,
+    #[error("Cannot add device")]
     AddDeviceError,
+    #[error("Device not found")]
     DeviceNotFound,
+    #[error("Room not found")]
     RoomNotFound,
+    #[error("Unknown error")]
     Unknown,
-    CommandExecutionFailure,
-}
-
-impl Error for CustomError {}
-impl Display for CustomError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        use CustomError::*;
-        match self {
-            DeviceFailure(err) => {
-                write!(f, "error: {:?}", err)
-            }
-            AddRoomError => write!(f, "add room error"),
-            AddDeviceError => write!(f, "add device error"),
-            DeviceNotFound => write!(f, "device not found"),
-            RoomNotFound => write!(f, "room not found"),
-            CommandExecutionFailure => write!(f, "failed to execute command"),
-            Unknown => write!(f, "unknown error"),
-        }
-    }
+    #[error("Failed to execute command. Message: {0}")]
+    CommandExecutionFailure(String),
 }

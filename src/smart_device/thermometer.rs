@@ -1,5 +1,4 @@
-use crate::Executable;
-use derive_more::Display;
+use crate::{house::CustomResult, Executable};
 
 use super::command::ExecutionResult;
 
@@ -45,15 +44,10 @@ impl Thermometer {
     }
 }
 impl Executable for Thermometer {
-    fn execute(
-        &mut self,
-        _command: crate::DeviceCommand,
-    ) -> Result<ExecutionResult, Box<dyn std::error::Error>> {
+    fn execute(&mut self, _command: crate::DeviceCommand) -> CustomResult<ExecutionResult> {
         todo!()
     }
 }
-#[derive(Debug, Display, Default)]
-pub struct ThermometerError {}
 
 #[cfg(test)]
 mod test {
