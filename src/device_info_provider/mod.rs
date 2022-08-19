@@ -6,7 +6,7 @@ pub trait DeviceInfoProvider {
     fn get_device_info(&self, room: &str, device: &str) -> CustomResult<DeviceInfo>;
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct DeviceInfo {
     pub kind: String,
     pub name: String,
