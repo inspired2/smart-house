@@ -52,6 +52,9 @@ impl SmartDeviceList {
         }
         Err(CustomError::DeviceNotFound)
     }
+    pub fn clone(&self) -> Arc<DashMap<String, Vec<SmartDevice>>> {
+        Arc::clone(&self.0)
+    }
 }
 impl DeviceInfoProvider for SmartDeviceList {
     fn get_device_info(&self, room: &str, device: &str) -> CustomResult<DeviceInfo> {
