@@ -13,7 +13,7 @@ pub struct DeviceInfo {
     pub state: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SmartDeviceList(Arc<DashMap<String, Vec<SmartDevice>>>);
 impl Default for SmartDeviceList {
     fn default() -> Self {
@@ -51,9 +51,6 @@ impl SmartDeviceList {
             }
         }
         Err(CustomError::DeviceNotFound)
-    }
-    pub fn clone(&self) -> Arc<DashMap<String, Vec<SmartDevice>>> {
-        Arc::clone(&self.0)
     }
 }
 impl DeviceInfoProvider for SmartDeviceList {
