@@ -62,18 +62,19 @@ impl SmartHouse {
             .iter_mut()
             .find(|r| r.name.to_lowercase() == room_name.to_lowercase())
     }
-    pub fn get_devices(&self, room: &str) -> Vec<&str> {
-        let devices = Vec::new();
+
+    pub fn get_devices(&self, room: &str) -> CustomResult<Vec<&str>> {
         let room = self.rooms.iter().find(|&r| r.name == room);
         if room.is_none() {
-            return devices;
+            return Err(CustomError::RoomNotFound);
         };
-        room.unwrap().devices.iter().map(|d| d.as_str()).collect()
+        Ok(room.unwrap().devices.iter().map(|d| d.as_str()).collect())
     }
+
     pub fn get_report<T: DeviceInfoProvider>(&self, provider: T) -> String {
         let mut report = String::new();
         for &room in self.get_rooms().iter() {
-            for device in self.get_devices(room) {
+            for device in self.get_devices(room).unwrap() {
                 let device_info: String = provider
                     .get_device_info(room, device)
                     .map(|i| format!("{:?}", i))
