@@ -90,7 +90,7 @@ fn room_contains_devices() {
     let mut house = create_house();
     house.try_add_device("hall", "therm1").unwrap();
     house.try_add_device("hall", "therm2").unwrap();
-    let hall_devices = house.get_devices("hall");
+    let hall_devices = house.get_devices("hall").unwrap();
     assert!(hall_devices.contains(&"therm1") && hall_devices.contains(&"therm2"));
 }
 
