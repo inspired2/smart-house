@@ -103,7 +103,7 @@ fn create_report() {
     house.try_add_device("hall", "socket2").unwrap();
 
     let storage = create_devices_storage();
-    let report = house.get_report(storage);
+    let report = house.get_report(&storage);
 
     assert!(report.contains("therm1"));
     assert!(report.contains("therm2"));
@@ -119,7 +119,7 @@ fn report_contains_error_if_no_device() {
     house.try_add_device("hall", "socket").unwrap();
 
     let storage = create_devices_storage();
-    let report = house.get_report(storage);
+    let report = house.get_report(&storage);
     println!("{}", report);
     assert!(report.contains("device not found"));
 }

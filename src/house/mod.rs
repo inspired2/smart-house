@@ -71,7 +71,7 @@ impl SmartHouse {
         Ok(room.unwrap().devices.iter().map(|d| d.as_str()).collect())
     }
 
-    pub fn get_report<T: DeviceInfoProvider>(&self, provider: T) -> String {
+    pub fn get_report<T: DeviceInfoProvider>(&self, provider: &T) -> String {
         let mut report = String::new();
         for &room in self.get_rooms().iter() {
             for device in self.get_devices(room).unwrap() {
@@ -79,7 +79,7 @@ impl SmartHouse {
                     .get_device_info(room, device)
                     .map(|i| format!("{:?}", i))
                     .unwrap_or_else(|err| err.to_string());
-                writeln!(&mut report, "room: {}, device: {}\n", room, device_info).unwrap();
+                writeln!(&mut report, "room: {}, device: {}", room, device_info).unwrap();
             }
         }
         report

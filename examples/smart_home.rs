@@ -46,7 +46,7 @@ fn main() -> CustomResult<()> {
     device_list.add_device("room2", device2)?;
 
     //get_report method is generic over some type that implements DeviceInfoProvider trait;
-    let report = house.get_report(device_list);
+    let report = house.get_report(&device_list);
     println!("{}", report);
 
     Ok(())
