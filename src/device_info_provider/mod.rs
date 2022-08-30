@@ -39,18 +39,17 @@ impl SmartDeviceList {
             true => Err(CustomError::AddDeviceError),
         }
     }
-    pub fn execute_command(&self, cmd: CommandData) -> CustomResult<ExecutionResult> {
+    pub fn execute_command(&self, cmd: CommandData) -> ExecutionResult {
         let CommandData { device_name, data } = cmd;
         for mut room in self.0.iter_mut() {
             for device in room.iter_mut() {
                 if device.get_name() == device_name {
                     return device
                         .execute_command(data)
-                        .map_err(|e| CustomError::DeviceFailure(e.to_string()));
                 }
             }
         }
-        Err(CustomError::DeviceNotFound)
+        ExecutionResult::Error(CustomError::DeviceNotFound)
     }
     pub fn get_inner_list(&self) -> Arc<DashMap<String, Vec<SmartDevice>>> {
         Arc::clone(&self.0)

@@ -26,12 +26,19 @@ impl DeviceCommand {
             )),
         }
     }
+
 }
 #[derive(Debug, Serialize, Deserialize, Copy, Clone)]
 pub enum PowerSocketCommand {
     TurnOn,
     TurnOff,
     GetState,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PowerSocketResult {
+    pub command: PowerSocketCommand,
+    pub result: Result<PowerSocketState, String>
+    
 }
 impl PowerSocketCommand {
     fn from_u8(n: u8) -> Result<Self, CustomError> {
@@ -73,5 +80,5 @@ pub enum ExecutionResult {
     Error(crate::error::CustomError),
 }
 pub trait Executable {
-    fn execute(&mut self, command: DeviceCommand) -> CustomResult<ExecutionResult>;
+    fn execute(&mut self, command: DeviceCommand) -> ExecutionResult;
 }

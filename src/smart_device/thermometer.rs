@@ -44,7 +44,7 @@ impl Thermometer {
     }
 }
 impl Executable for Thermometer {
-    fn execute(&mut self, _command: crate::DeviceCommand) -> CustomResult<ExecutionResult> {
+    fn execute(&mut self, _command: crate::DeviceCommand) -> ExecutionResult {
         todo!()
     }
 }

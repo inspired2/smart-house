@@ -46,7 +46,7 @@ impl SmartDevice {
             SmartDevice::Thermo(_) => "SmartThermometer".to_owned(),
         }
     }
-    pub fn execute_command(&mut self, cmd: DeviceCommand) -> CustomResult<ExecutionResult> {
+    pub fn execute_command(&mut self, cmd: DeviceCommand) -> ExecutionResult {
         match self {
             SmartDevice::Socket(sock) => sock.execute(cmd),
             SmartDevice::Thermo(therm) => therm.execute(cmd),
