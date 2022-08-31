@@ -10,5 +10,5 @@ pub use smart_device::{
     PowerSocketCommand, PowerSocketState, SmartDevice, Temperature, Thermometer,
 };
 
-use error::CustomError;
+pub use error::CustomError;
 pub use house::CustomResult;
